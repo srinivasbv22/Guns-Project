@@ -17,11 +17,26 @@ node {
 	
 	
 	//Deployment on tomcat
-	stage ('Final deploy'){
+	stage ('Deploy to local tomcat vm'){
 		sh 'cp  /var/lib/jenkins/workspace/Guns-Project/target/*.war /opt/tomcat/apache-tomcat-8.5.38/webapps/'
 	}
 	
+	//Build Docker image
+	stage ('Docker image with version'){
+		sh "docker build -t srinivasbv22/tomcat:${BUILD_NUMBER} ."
+	}
+	
+	//remove old docker containers
+	stage ('Tomcat container delete'){
+		sh "docker rm -f tomcat"
+	}
+	
+	//Deploy to tomcat container
+	stage ('Deploy stage'){
+		sh "docker run -d -p 8082:8080 -v /opt/tomcat/apache-tomcat-8.5.38/webapps:/usr/local/tomcat/webapps --name tomcat srinivasbv22/tomcat"
+	}
 	
 }
 	
 	
+
